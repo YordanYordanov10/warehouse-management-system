@@ -1,7 +1,9 @@
 package com.yordanov.warehouse.Web.Mapper;
 
+import com.yordanov.warehouse.InventoryMovement.Model.InventoryMovement;
 import com.yordanov.warehouse.Warehouse.Model.Warehouse;
 import com.yordanov.warehouse.Web.Dto.ProductResponse;
+import com.yordanov.warehouse.Web.Dto.ReceiveStockResponse;
 import com.yordanov.warehouse.Web.Dto.WarehouseResponse;
 import lombok.experimental.UtilityClass;
 import com.yordanov.warehouse.Product.Model.Product;
@@ -46,5 +48,7 @@ public class DtoMapper {
     public static List<WarehouseResponse> toWarehouseResponseList(List<Warehouse> warehouses) {
         return warehouses.stream().map(DtoMapper::toWarehouseResponse).toList();
     }
+
+
 
 }

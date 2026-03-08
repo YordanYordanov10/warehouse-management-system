@@ -12,6 +12,7 @@ import com.yordanov.warehouse.Product.Repository.ProductRepository;
 import com.yordanov.warehouse.Warehouse.Model.Warehouse;
 import com.yordanov.warehouse.Warehouse.Repository.WarehouseRepository;
 import com.yordanov.warehouse.Web.Dto.ReceiveStockRequest;
+import com.yordanov.warehouse.Web.Dto.ReceiveStockResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -34,21 +35,23 @@ public class StockService {
     }
 
     @Transactional
-    public InventoryMovement receiveStock(ReceiveStockRequest receiveStockRequest) {
+    public ReceiveStockResponse receiveStock(ReceiveStockRequest receiveStockRequest) {
 
        Product product = productRepository.findById(receiveStockRequest.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
        Warehouse warehouse = warehouseRepository.findById(receiveStockRequest.getWarehouseId()).orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
 
        Optional<Inventory> optionalInventory = inventoryRepository.findByWarehouseIdAndProductId(warehouse.getId(),product.getId());
 
+       Inventory inventory = new Inventory();
+
         if(optionalInventory.isPresent()){
-            Inventory inventory = optionalInventory.get();
+            inventory = optionalInventory.get();
             inventory.setQuantity(inventory.getQuantity() + receiveStockRequest.getQuantity());
             inventory.setUpdatedAt(LocalDateTime.now());
 
             inventoryRepository.save(inventory);
         }else{
-            Inventory inventory = Inventory.builder()
+           inventory = Inventory.builder()
                     .product(product)
                     .warehouse(warehouse)
                     .quantity(receiveStockRequest.getQuantity())
@@ -70,6 +73,13 @@ public class StockService {
 
         inventoryMovementRepository.save(inventoryMovement);
 
-        return inventoryMovement;
+        return ReceiveStockResponse.builder()
+                .movementId(inventoryMovement.getId())
+                .productId(product.getId())
+                .warehouseId(warehouse.getId())
+                .receiveDate(inventoryMovement.getCreatedAt())
+                .receiveQuantity(receiveStockRequest.getQuantity())
+                .newQuantity(inventory.getQuantity())
+                .build();
     }
 }
