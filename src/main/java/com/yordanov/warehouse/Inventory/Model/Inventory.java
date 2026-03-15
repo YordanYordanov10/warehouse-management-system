@@ -50,6 +50,8 @@ public class Inventory {
     private Warehouse warehouse;
 
 
-
+    public int getAvailableQuantity(){
+        return getQuantity() - getReservedQuantity();
+    }
 
 }

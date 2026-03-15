@@ -12,4 +12,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, UUID> {
 
 
     Optional<Inventory> findByWarehouseIdAndProductId(UUID id, UUID id1);
+
+
+
 }
