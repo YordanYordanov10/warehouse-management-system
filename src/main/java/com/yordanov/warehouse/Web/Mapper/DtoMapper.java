@@ -1,14 +1,14 @@
 package com.yordanov.warehouse.Web.Mapper;
 
 import com.yordanov.warehouse.InventoryMovement.Model.InventoryMovement;
+import com.yordanov.warehouse.Order.Model.Order;
 import com.yordanov.warehouse.Warehouse.Model.Warehouse;
-import com.yordanov.warehouse.Web.Dto.ProductResponse;
-import com.yordanov.warehouse.Web.Dto.ReceiveStockResponse;
-import com.yordanov.warehouse.Web.Dto.WarehouseResponse;
+import com.yordanov.warehouse.Web.Dto.*;
 import lombok.experimental.UtilityClass;
 import com.yordanov.warehouse.Product.Model.Product;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public class DtoMapper {
@@ -50,6 +50,22 @@ public class DtoMapper {
         return warehouses.stream().map(DtoMapper::toWarehouseResponse).toList();
     }
 
+    public static CreateOrderResponse toCreateOrderResponse(Order order){
 
+//        TODO
+//        List<OrderItemResponse> itemResponses = orderItems.stream()
+//                .map(item -> OrderItemResponse.builder()
+//                        .productId(item.getProductId())
+//                        .orderedQuantity(item.getOrderedQuantity())
+//                        .build())
+//                .collect(Collectors.toList());
+
+        return CreateOrderResponse.builder()
+                .orderId(order.getId())
+                .orderReference(order.getOrderReference())
+                .status(order.getOrderStatus())
+//                .items(itemResponses)
+                .build();
+    }
 
 }

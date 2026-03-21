@@ -1,9 +1,6 @@
-package com.yordanov.warehouse.Product.Model;
-
+package com.yordanov.warehouse.Order.Model;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,26 +10,23 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
-    private String name;
+    private String orderReference;
 
-    @Column(nullable = false, unique = true)
-    private String sku;
-
-
-    private String description;
-
-    @Column(nullable = false)
-    private BigDecimal price;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
 
 }
