@@ -1,7 +1,10 @@
 package com.yordanov.warehouse.Order.Model;
+import com.yordanov.warehouse.OrderItem.Model.OrderItem;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -28,5 +31,6 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
 }

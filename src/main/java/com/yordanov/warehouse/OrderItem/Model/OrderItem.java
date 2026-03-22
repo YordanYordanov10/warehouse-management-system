@@ -1,5 +1,6 @@
 package com.yordanov.warehouse.OrderItem.Model;
 
+import com.yordanov.warehouse.Order.Model.Order;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,4 +27,7 @@ public class OrderItem {
     @Column(nullable = false)
     private int quantity;
 
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
 }

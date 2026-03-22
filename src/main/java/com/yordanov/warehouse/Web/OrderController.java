@@ -6,8 +6,10 @@ import com.yordanov.warehouse.Web.Dto.CreateOrderRequest;
 import com.yordanov.warehouse.Web.Dto.CreateOrderResponse;
 import com.yordanov.warehouse.Web.Mapper.DtoMapper;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,10 +24,11 @@ public class OrderController {
     }
 
     @PostMapping("/createOrder")
-    public ResponseEntity<CreateOrderResponse> createOrder(@Valid CreateOrderRequest createOrderRequest) {
+    public ResponseEntity<CreateOrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest createOrderRequest) {
 
         Order order = orderService.createOrder(createOrderRequest);
         CreateOrderResponse createOrderResponse = DtoMapper.toCreateOrderResponse(order);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createOrderResponse);
 
     }
 }

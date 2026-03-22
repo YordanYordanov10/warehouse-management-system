@@ -1,6 +1,5 @@
 package com.yordanov.warehouse.Web.Mapper;
 
-import com.yordanov.warehouse.InventoryMovement.Model.InventoryMovement;
 import com.yordanov.warehouse.Order.Model.Order;
 import com.yordanov.warehouse.Warehouse.Model.Warehouse;
 import com.yordanov.warehouse.Web.Dto.*;
@@ -52,19 +51,19 @@ public class DtoMapper {
 
     public static CreateOrderResponse toCreateOrderResponse(Order order){
 
-//        TODO
-//        List<OrderItemResponse> itemResponses = orderItems.stream()
-//                .map(item -> OrderItemResponse.builder()
-//                        .productId(item.getProductId())
-//                        .orderedQuantity(item.getOrderedQuantity())
-//                        .build())
-//                .collect(Collectors.toList());
+
+        List<OrderItemResponse> itemResponses = order.getItems().stream()
+                .map(item -> OrderItemResponse.builder()
+                        .productId(item.getProductId())
+                        .orderedQuantity(item.getQuantity())
+                        .build())
+                .collect(Collectors.toList());
 
         return CreateOrderResponse.builder()
                 .orderId(order.getId())
                 .orderReference(order.getOrderReference())
                 .status(order.getOrderStatus())
-//                .items(itemResponses)
+                .items(itemResponses)
                 .build();
     }
 
