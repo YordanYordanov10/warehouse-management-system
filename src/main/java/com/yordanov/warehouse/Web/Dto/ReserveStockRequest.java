@@ -19,9 +19,4 @@ public class ReserveStockRequest {
     @Min(value = 1, message = "Quantity must be greater than 0")
     private int quantity;
 
-    @NotBlank
-    private String reference;
-
-    @NotNull
-    private ReferenceType referenceType;
 }

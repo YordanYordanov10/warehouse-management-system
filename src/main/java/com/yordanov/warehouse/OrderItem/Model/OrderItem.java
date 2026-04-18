@@ -19,9 +19,6 @@ public class OrderItem {
     private UUID id;
 
     @Column(nullable = false)
-    private UUID orderId;
-
-    @Column(nullable = false)
     private UUID productId;
 
     @Column(nullable = false)

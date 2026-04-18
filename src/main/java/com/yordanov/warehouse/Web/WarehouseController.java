@@ -2,6 +2,7 @@ package com.yordanov.warehouse.Web;
 
 import com.yordanov.warehouse.Warehouse.Model.Warehouse;
 import com.yordanov.warehouse.Warehouse.Service.WarehouseService;
+import com.yordanov.warehouse.Web.Dto.UpdateWarehouseRequest;
 import com.yordanov.warehouse.Web.Dto.WarehouseRequest;
 import com.yordanov.warehouse.Web.Dto.WarehouseResponse;
 import com.yordanov.warehouse.Web.Mapper.DtoMapper;
@@ -57,9 +58,9 @@ public class WarehouseController {
     }
 
     @PatchMapping("/warehouses/{id}")
-    public ResponseEntity<WarehouseResponse> changeStatusWarehouse(@PathVariable UUID id,@Valid @RequestBody WarehouseRequest warehouseRequest) {
+    public ResponseEntity<WarehouseResponse> changeStatusWarehouse(@PathVariable UUID id, @Valid @RequestBody UpdateWarehouseRequest updateWarehouseRequest) {
 
-        Warehouse warehouse = warehouseService.changeStatusWarehouse(id,warehouseRequest.getStatus());
+        Warehouse warehouse = warehouseService.changeStatusWarehouse(id,updateWarehouseRequest);
         WarehouseResponse warehouseResponse = DtoMapper.toWarehouseResponse(warehouse);
         return new ResponseEntity<>(warehouseResponse, HttpStatus.OK);
     }

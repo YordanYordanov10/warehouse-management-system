@@ -2,6 +2,8 @@ package com.yordanov.warehouse.Web.Dto;
 
 import com.yordanov.warehouse.Warehouse.Model.WarehouseStatus;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -28,13 +30,8 @@ public class WarehouseRequest {
     @NotBlank
     private String country;
 
-    @NotBlank
+    @Positive(message = "Max pallet capacity must be positive")
     private int maxPalletCapacity;
-
-    @NotBlank
-    private WarehouseStatus status;
-
-
 
 
 }

@@ -41,9 +41,8 @@ public class ReferenceSequenceService {
         String warehouseCode = null;
 
         if (warehouseId != null) {
-            warehouseCode = warehouseRepository.findById(warehouseId)
-                    .orElseThrow(() -> new ResourceNotFoundException(""))
-                .getWarehouseCode();
+            warehouseCode = warehouseRepository.findById(warehouseId).
+                    orElseThrow(() -> new ResourceNotFoundException("No such Warehouse by given warehouse code - %s")).getWarehouseCode();
         }
 
         return buildReference(type, warehouseCode, date, referenceSequence.getCurrentValue());
@@ -55,9 +54,9 @@ public class ReferenceSequenceService {
         String formattedSequence = String.format("%06d", currentValue);
 
         if(warehouseCode == null) {
-            reference = type + "-" + date + "-" +  currentValue;
+            reference = type + "-" + date + "-" +  formattedSequence;
         } else {
-          reference = type + "-" + warehouseCode + "-" + date + "-" + currentValue;
+          reference = type + "-" + warehouseCode + "-" + date + "-" + formattedSequence;
         }
 
         return reference;

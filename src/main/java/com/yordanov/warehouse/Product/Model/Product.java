@@ -34,5 +34,7 @@ public class Product {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    private LocalDateTime updatedAt;
+
 
 }

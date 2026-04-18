@@ -5,6 +5,7 @@ import com.yordanov.warehouse.Exception.ResourceNotFoundException;
 import com.yordanov.warehouse.Warehouse.Model.Warehouse;
 import com.yordanov.warehouse.Warehouse.Model.WarehouseStatus;
 import com.yordanov.warehouse.Warehouse.Repository.WarehouseRepository;
+import com.yordanov.warehouse.Web.Dto.UpdateWarehouseRequest;
 import com.yordanov.warehouse.Web.Dto.WarehouseRequest;
 import org.springframework.stereotype.Service;
 
@@ -59,22 +60,14 @@ public class WarehouseService {
 
     public Warehouse updateWarehouse(WarehouseRequest warehouseRequest, UUID id) {
 
-        Warehouse warehouse = getWarehouseById(id);
-        Optional<Warehouse> warehouseWithSameWarehouseCode = warehouseRepository.findByWarehouseCode(warehouseRequest.getWarehouseCode());
-
-        warehouse.setName(warehouseRequest.getName());
-        if(warehouseWithSameWarehouseCode.isEmpty()) {
-           warehouse.setWarehouseCode(warehouseRequest.getWarehouseCode());
-        }else{
-            throw new ConflictException("Warehouse with id %s already exists".formatted(id));
-        }
+        Warehouse warehouse = warehouseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Warehouse with id %s not found".formatted(id)));
 
         warehouse.setCity(warehouseRequest.getCity());
         warehouse.setCountry(warehouseRequest.getCountry());
         warehouse.setAddress(warehouseRequest.getAddress());
         warehouse.setPostalCode(warehouseRequest.getPostalCode());
         warehouse.setMaxPalletCapacity(warehouseRequest.getMaxPalletCapacity());
-        warehouse.setWarehouseStatus(warehouseRequest.getStatus());
+        warehouse.setWarehouseStatus(warehouse.getWarehouseStatus());
         warehouse.setUpdatedAt(LocalDateTime.now());
 
         warehouseRepository.save(warehouse);
@@ -82,10 +75,10 @@ public class WarehouseService {
         return warehouse;
     }
 
-    public Warehouse changeStatusWarehouse(UUID id, WarehouseStatus status) {
+    public Warehouse changeStatusWarehouse(UUID id, UpdateWarehouseRequest updateWarehouseRequest) {
 
-        Warehouse warehouse = getWarehouseById(id);
-        warehouse.setWarehouseStatus(status);
+        Warehouse warehouse = warehouseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Warehouse with id %s not found".formatted(id)));
+        warehouse.setWarehouseStatus(updateWarehouseRequest.getStatus());
         warehouse.setUpdatedAt(LocalDateTime.now());
 
         warehouseRepository.save(warehouse);

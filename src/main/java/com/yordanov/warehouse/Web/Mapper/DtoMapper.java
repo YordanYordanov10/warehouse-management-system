@@ -37,7 +37,6 @@ public class DtoMapper {
                 .city(warehouse.getCity())
                 .country(warehouse.getCountry())
                 .postalCode(warehouse.getPostalCode())
-                .city(warehouse.getCity())
                 .maxPalletCapacity(warehouse.getMaxPalletCapacity())
                 .warehouseStatus(warehouse.getWarehouseStatus())
                 .updatedAt(warehouse.getUpdatedAt())

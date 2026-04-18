@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 public class ProductRequest {
 
     @NotBlank(message = "Name is required")
+    @Size(min = 1, max = 255, message = "Name must be 1-255 characters")
     private String name;
 
     @NotBlank(message = "sku is required")

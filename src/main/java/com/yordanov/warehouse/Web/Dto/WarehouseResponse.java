@@ -1,8 +1,6 @@
 package com.yordanov.warehouse.Web.Dto;
 
 import com.yordanov.warehouse.Warehouse.Model.WarehouseStatus;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

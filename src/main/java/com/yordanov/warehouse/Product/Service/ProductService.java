@@ -8,6 +8,7 @@ import com.yordanov.warehouse.Product.Repository.ProductRepository;
 import com.yordanov.warehouse.Web.Dto.ProductRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +35,7 @@ public class ProductService {
                 .price(productRequest.getPrice())
                 .description(productRequest.getDescription())
                 .sku(productRequest.getSku())
+                .createdAt(LocalDateTime.now())
                 .build();
         productRepository.save(product);
 
@@ -59,6 +61,7 @@ public class ProductService {
         product.setPrice(productRequest.getPrice());
         product.setDescription(productRequest.getDescription());
         product.setSku(productRequest.getSku());
+        product.setUpdatedAt(LocalDateTime.now());
         productRepository.save(product);
         return product;
     }

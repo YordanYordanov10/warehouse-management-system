@@ -1,10 +1,8 @@
 package com.yordanov.warehouse.Web;
 
 import com.yordanov.warehouse.Inventory.Service.InventoryService;
-import com.yordanov.warehouse.InventoryMovement.Model.InventoryMovement;
 import com.yordanov.warehouse.StockService.StockService;
 import com.yordanov.warehouse.Web.Dto.*;
-import com.yordanov.warehouse.Web.Mapper.DtoMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class StockServiceController {
 
     private final StockService stockService;
-    private final InventoryService inventoryService;
+
 
     public StockServiceController(StockService stockService, InventoryService inventoryService) {
         this.stockService = stockService;
-        this.inventoryService = inventoryService;
+
     }
 
     @PostMapping("/receive")
@@ -43,6 +41,13 @@ public class StockServiceController {
     public ResponseEntity<ReleaseStockResponse> releaseStock(@Valid @RequestBody ReleaseStockRequest request) {
 
         ReleaseStockResponse response = stockService.releaseStock(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/ship")
+    public ResponseEntity<ShipStockResponse> shipStock(@Valid @RequestBody ShipStockRequest request) {
+
+        ShipStockResponse response = stockService.shipStock(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
