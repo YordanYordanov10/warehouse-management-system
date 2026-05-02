@@ -24,6 +24,9 @@ public class OrderItem {
     @Column(nullable = false)
     private int quantity;
 
+    @Column(nullable = false)
+    private UUID warehouseId;
+
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
