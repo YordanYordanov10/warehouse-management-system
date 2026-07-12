@@ -44,6 +44,10 @@ public class DtoMapper {
                 .build();
     }
 
+    public static WarehouseResponseStatus toWarehouseResponseStatus(Warehouse warehouse){
+        return new WarehouseResponseStatus(warehouse.getId(),warehouse.getWarehouseStatus());
+    }
+
     public static List<WarehouseResponse> toWarehouseResponseList(List<Warehouse> warehouses) {
         return warehouses.stream().map(DtoMapper::toWarehouseResponse).toList();
     }

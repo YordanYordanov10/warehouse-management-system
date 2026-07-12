@@ -5,6 +5,7 @@ import com.yordanov.warehouse.Warehouse.Service.WarehouseService;
 import com.yordanov.warehouse.Web.Dto.UpdateWarehouseRequest;
 import com.yordanov.warehouse.Web.Dto.WarehouseRequest;
 import com.yordanov.warehouse.Web.Dto.WarehouseResponse;
+import com.yordanov.warehouse.Web.Dto.WarehouseResponseStatus;
 import com.yordanov.warehouse.Web.Mapper.DtoMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -95,10 +96,10 @@ public class WarehouseController {
         @ApiResponse(responseCode = "404", description = "Warehouse not found")
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<WarehouseResponse> changeStatusWarehouse(@PathVariable UUID id, @Valid @RequestBody UpdateWarehouseRequest updateWarehouseRequest) {
+    public ResponseEntity<WarehouseResponseStatus> changeStatusWarehouse(@PathVariable UUID id, @Valid @RequestBody UpdateWarehouseRequest updateWarehouseRequest) {
 
         Warehouse warehouse = warehouseService.changeStatusWarehouse(id,updateWarehouseRequest);
-        WarehouseResponse warehouseResponse = DtoMapper.toWarehouseResponse(warehouse);
+        WarehouseResponseStatus warehouseResponse = DtoMapper.toWarehouseResponseStatus(warehouse);
         return new ResponseEntity<>(warehouseResponse, HttpStatus.OK);
     }
 }
