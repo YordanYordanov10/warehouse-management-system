@@ -9,7 +9,6 @@ import com.yordanov.warehouse.Web.Dto.UpdateWarehouseRequest;
 import com.yordanov.warehouse.Web.Dto.WarehouseRequest;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,8 +45,6 @@ public class WarehouseService {
                 .maxPalletCapacity(warehouseRequest.getMaxPalletCapacity())
                 .postalCode(warehouseRequest.getPostalCode())
                 .warehouseStatus(WarehouseStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
 
         return warehouseRepository.save(warehouse);
@@ -68,7 +65,6 @@ public class WarehouseService {
         warehouse.setPostalCode(warehouseRequest.getPostalCode());
         warehouse.setMaxPalletCapacity(warehouseRequest.getMaxPalletCapacity());
         warehouse.setWarehouseStatus(warehouse.getWarehouseStatus());
-        warehouse.setUpdatedAt(LocalDateTime.now());
 
         warehouseRepository.save(warehouse);
 
@@ -79,7 +75,6 @@ public class WarehouseService {
 
         Warehouse warehouse = warehouseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Warehouse with id %s not found".formatted(id)));
         warehouse.setWarehouseStatus(updateWarehouseRequest.getStatus());
-        warehouse.setUpdatedAt(LocalDateTime.now());
 
         warehouseRepository.save(warehouse);
         return warehouse;

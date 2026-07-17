@@ -1,6 +1,5 @@
 package com.yordanov.warehouse.StockService;
 
-import com.yordanov.warehouse.Exception.ConflictException;
 import com.yordanov.warehouse.Exception.ResourceNotFoundException;
 import com.yordanov.warehouse.Inventory.Model.Inventory;
 import com.yordanov.warehouse.Inventory.Repository.InventoryRepository;
@@ -43,25 +42,14 @@ public class StockService {
        Product product = productRepository.findById(receiveStockRequest.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
        Warehouse warehouse = warehouseRepository.findById(receiveStockRequest.getWarehouseId()).orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
 
-       LocalDateTime now = LocalDateTime.now();
-
         Inventory inventory = inventoryRepository
                 .findByWarehouseIdAndProductId(warehouse.getId(), product.getId())
-                .orElseGet(() -> Inventory.builder()
-                        .product(product)
-                        .warehouse(warehouse)
-                        .quantity(0)
-                        .reservedQuantity(0)
-                        .createdAt(now)
-                        .build()
-                );
+                .orElseGet(() -> Inventory.createEmpty(product, warehouse));
 
-        inventory.setQuantity(inventory.getQuantity() + receiveStockRequest.getQuantity());
-        inventory.setUpdatedAt(now);
-
+        inventory.receive(receiveStockRequest.getQuantity());
         inventoryRepository.save(inventory);
 
-        InventoryMovement inventoryMovement = createInventoryMovement(warehouse,product, receiveStockRequest.getQuantity(), ReferenceType.DELIVERY,MovementType.IN, now);
+        InventoryMovement inventoryMovement = createInventoryMovement(warehouse,product, receiveStockRequest.getQuantity(), ReferenceType.DELIVERY,MovementType.IN);
         inventoryMovementRepository.save(inventoryMovement);
 
         return ReceiveStockResponse.builder()
@@ -79,19 +67,11 @@ public class StockService {
 
         Inventory inventory = findInventoryByWarehouseIdAndProductId(reserveStockRequest.getWarehouseId(),reserveStockRequest.getProductId());
 
-        int availableQuantity = inventory.getAvailableQuantity();
-
-        LocalDateTime now = LocalDateTime.now();
-
-        if(availableQuantity < reserveStockRequest.getQuantity()){
-            throw new ConflictException("Not enough quantity to reserve, available is %s".formatted(availableQuantity));
-        }
-            inventory.setReservedQuantity(inventory.getReservedQuantity() + reserveStockRequest.getQuantity());
-            inventory.setUpdatedAt(now);
+        inventory.reserve(reserveStockRequest.getQuantity());    
             inventoryRepository.save(inventory);
 
         InventoryMovement inventoryMovement = createInventoryMovement(inventory.getWarehouse(), inventory.getProduct(),
-                reserveStockRequest.getQuantity(), ReferenceType.ORDER,MovementType.RESERVE, now);
+                reserveStockRequest.getQuantity(), ReferenceType.ORDER,MovementType.RESERVE);
 
         inventoryMovementRepository.save(inventoryMovement);
 
@@ -100,10 +80,10 @@ public class StockService {
                 .productId(inventory.getProduct().getId())
                 .warehouseId(inventory.getWarehouse().getId())
                 .reserveQuantity(reserveStockRequest.getQuantity())
-                .availableQuantity(availableQuantity - reserveStockRequest.getQuantity())
+                .availableQuantity(inventory.getAvailableQuantity())
                 .reference(inventoryMovement.getReference())
                 .referenceType(ReferenceType.ORDER)
-                .reserveAt(now)
+                .reserveAt(inventoryMovement.getCreatedAt())
                 .build();
     }
 
@@ -112,18 +92,11 @@ public class StockService {
 
         Inventory inventory = findInventoryByWarehouseIdAndProductId(releaseStockRequest.getWarehouseId(),releaseStockRequest.getProductId());
 
-        if(inventory.getReservedQuantity() < releaseStockRequest.getQuantity()){
-            throw new ConflictException("Not enough stock to release");
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-
-        inventory.setReservedQuantity(inventory.getReservedQuantity() - releaseStockRequest.getQuantity());
-        inventory.setUpdatedAt(now);
+        inventory.release(releaseStockRequest.getQuantity());
         inventoryRepository.save(inventory);
 
         InventoryMovement inventoryMovement = createInventoryMovement(inventory.getWarehouse(),inventory.getProduct(),
-                releaseStockRequest.getQuantity(), ReferenceType.ORDER,MovementType.RELEASE, now);
+                releaseStockRequest.getQuantity(), ReferenceType.ORDER,MovementType.RELEASE);
 
         inventoryMovementRepository.save(inventoryMovement);
 
@@ -134,7 +107,7 @@ public class StockService {
                 .releaseQuantity(releaseStockRequest.getQuantity())
                 .reference(inventoryMovement.getReference())
                 .referenceType(ReferenceType.ORDER)
-                .releaseAt(now)
+                .releaseAt(inventoryMovement.getCreatedAt())
                 .build();
     }
 
@@ -146,20 +119,11 @@ public class StockService {
                 shipStockRequest.getProductId()
         );
 
-        if(inventory.getReservedQuantity() < shipStockRequest.getQuantity()){
-            throw new ConflictException("Not enough reserved stock to ship");
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-
-
-        inventory.setReservedQuantity(inventory.getReservedQuantity() - shipStockRequest.getQuantity());
-        inventory.setQuantity(inventory.getQuantity() - shipStockRequest.getQuantity());
-        inventory.setUpdatedAt(now);
+        inventory.ship(shipStockRequest.getQuantity());
         inventoryRepository.save(inventory);
 
         InventoryMovement inventoryMovement = createInventoryMovement(inventory.getWarehouse(),inventory.getProduct(),
-                shipStockRequest.getQuantity(),ReferenceType.ORDER,MovementType.OUT,now);
+                shipStockRequest.getQuantity(),ReferenceType.ORDER,MovementType.OUT);
 
         inventoryMovementRepository.save(inventoryMovement);
 
@@ -169,7 +133,6 @@ public class StockService {
                 .warehouseId(inventory.getWarehouse().getId())
                 .shipQuantity(shipStockRequest.getQuantity())
                 .reference(inventoryMovement.getReference())
-                .shipDate(now)
                 .build();
     }
 
@@ -180,7 +143,7 @@ public class StockService {
                         .formatted(productId,warehouseId)));
     }
 
-    private InventoryMovement createInventoryMovement(Warehouse warehouse,Product product,int quantity, ReferenceType referenceType, MovementType movementType, LocalDateTime now){
+    private InventoryMovement createInventoryMovement(Warehouse warehouse,Product product,int quantity, ReferenceType referenceType, MovementType movementType){
 
         return InventoryMovement.builder()
                 .warehouse(warehouse)
@@ -189,7 +152,6 @@ public class StockService {
                 .movementType(movementType)
                 .referenceType(referenceType)
                 .reference(referenceSequenceService.generateReference(referenceType,warehouse.getId()))
-                .createdAt(now)
                 .build();
     }
 }

@@ -3,6 +3,7 @@ package com.yordanov.warehouse;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @OpenAPIDefinition(
 		info = @io.swagger.v3.oas.annotations.info.Info(
 				title = "Warehouse API",
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 		)
 )
 @SpringBootApplication
+@EnableJpaAuditing
 public class WarehouseApplication {
 
 	public static void main(String[] args) {

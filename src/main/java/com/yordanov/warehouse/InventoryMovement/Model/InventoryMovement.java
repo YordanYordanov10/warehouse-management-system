@@ -8,6 +8,9 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 @Entity
 @Builder
 @Getter
@@ -21,6 +24,7 @@ import java.util.UUID;
                 @Index(name = "idx_created_at", columnList = "created_at")
         }
 )
+@EntityListeners(AuditingEntityListener.class)
 public class InventoryMovement {
 
     @Id
@@ -43,6 +47,7 @@ public class InventoryMovement {
     private int quantity;
 
     @Column(nullable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
