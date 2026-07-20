@@ -111,7 +111,7 @@ public class Order {
     public void cancel(String reason){
 
         if(this.orderStatus != OrderStatus.RESERVED){
-            throw new ConflictException("Order %s cannot be cancelledfrom status %s".formatted(orderReference,orderStatus));
+            throw new ConflictException("Order %s cannot be cancelled from status %s".formatted(orderReference,orderStatus));
         }
 
         this.orderStatus = OrderStatus.CANCELLED;

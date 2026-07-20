@@ -52,7 +52,8 @@ public class DtoMapper {
         return warehouses.stream().map(DtoMapper::toWarehouseResponse).toList();
     }
 
-    public static CreateOrderResponse toCreateOrderResponse(Order order){
+    
+    public static OrderResponse toCreateOrderResponse(Order order){
 
 
         List<OrderItemResponse> itemResponses = order.getItems().stream()
@@ -62,11 +63,12 @@ public class DtoMapper {
                         .build())
                 .collect(Collectors.toList());
 
-        return CreateOrderResponse.builder()
+        return OrderResponse.builder()
                 .orderId(order.getId())
                 .orderReference(order.getOrderReference())
                 .status(order.getOrderStatus())
                 .items(itemResponses)
+                .cancellationReason(order.getCancellationReason())
                 .build();
     }
 

@@ -26,13 +26,14 @@ public class StockService {
     private final InventoryRepository inventoryRepository;
     private final InventoryMovementRepository inventoryMovementRepository;
     private final ReferenceSequenceService referenceSequenceService;
+ 
 
-    public StockService(ProductRepository productRepository, WarehouseRepository warehouseRepository, InventoryRepository inventoryRepository, InventoryMovementRepository inventoryMovementRepository, ReferenceSequenceService referenceSequenceService) {
+    public StockService(ProductRepository productRepository, WarehouseRepository warehouseRepository, InventoryRepository inventoryRepository, InventoryMovementRepository inventoryMovementRepository, ReferenceSequenceService referenceSequenceService, ReferenceSequenceService referenceSequenceService2) {
         this.productRepository = productRepository;
         this.warehouseRepository = warehouseRepository;
         this.inventoryRepository = inventoryRepository;
         this.inventoryMovementRepository = inventoryMovementRepository;
-        this.referenceSequenceService = referenceSequenceService;
+        this.referenceSequenceService = referenceSequenceService2;
     }
 
     @Transactional
@@ -48,7 +49,8 @@ public class StockService {
         inventory.receive(receiveStockRequest.getQuantity());
         inventoryRepository.save(inventory);
 
-        InventoryMovement inventoryMovement = createInventoryMovement(warehouse,product, receiveStockRequest.getQuantity(), ReferenceType.DELIVERY,MovementType.IN);
+        String reference = referenceSequenceService.generateReference(ReferenceType.DELIVERY, warehouse.getId());
+        InventoryMovement inventoryMovement = createInventoryMovement(warehouse,product, receiveStockRequest.getQuantity(), ReferenceType.DELIVERY,MovementType.IN, reference);
         inventoryMovementRepository.save(inventoryMovement);
 
         return ReceiveStockResponse.builder()
@@ -62,15 +64,15 @@ public class StockService {
     }
 
     @Transactional
-    public ReserveStockResponse reserveStock(ReserveStockRequest reserveStockRequest) {
+    public ReserveStockResponse reserveStock(UUID warehouseId, UUID productId, int quantity, String orderReference) {
 
-        Inventory inventory = findInventoryByWarehouseIdAndProductId(reserveStockRequest.getWarehouseId(),reserveStockRequest.getProductId());
+        Inventory inventory = findInventoryByWarehouseIdAndProductId(warehouseId,productId);
 
-        inventory.reserve(reserveStockRequest.getQuantity());    
+        inventory.reserve(quantity);    
             inventoryRepository.save(inventory);
 
         InventoryMovement inventoryMovement = createInventoryMovement(inventory.getWarehouse(), inventory.getProduct(),
-                reserveStockRequest.getQuantity(), ReferenceType.ORDER,MovementType.RESERVE);
+                quantity, ReferenceType.ORDER, MovementType.RESERVE, orderReference);
 
         inventoryMovementRepository.save(inventoryMovement);
 
@@ -78,7 +80,7 @@ public class StockService {
                 .movementId(inventoryMovement.getId())
                 .productId(inventory.getProduct().getId())
                 .warehouseId(inventory.getWarehouse().getId())
-                .reserveQuantity(reserveStockRequest.getQuantity())
+                .reserveQuantity(quantity)
                 .availableQuantity(inventory.getAvailableQuantity())
                 .reference(inventoryMovement.getReference())
                 .referenceType(ReferenceType.ORDER)
@@ -87,15 +89,15 @@ public class StockService {
     }
 
     @Transactional
-    public ReleaseStockResponse releaseStock(ReleaseStockRequest releaseStockRequest){
+    public ReleaseStockResponse releaseStock(UUID warehouseId, UUID productId, int quantity, String orderReference ){
 
-        Inventory inventory = findInventoryByWarehouseIdAndProductId(releaseStockRequest.getWarehouseId(),releaseStockRequest.getProductId());
+        Inventory inventory = findInventoryByWarehouseIdAndProductId(warehouseId, productId);
 
-        inventory.release(releaseStockRequest.getQuantity());
+        inventory.release(quantity);
         inventoryRepository.save(inventory);
 
         InventoryMovement inventoryMovement = createInventoryMovement(inventory.getWarehouse(),inventory.getProduct(),
-                releaseStockRequest.getQuantity(), ReferenceType.ORDER,MovementType.RELEASE);
+                quantity, ReferenceType.ORDER,MovementType.RELEASE, orderReference);
 
         inventoryMovementRepository.save(inventoryMovement);
 
@@ -103,7 +105,7 @@ public class StockService {
                 .productId(inventory.getProduct().getId())
                 .warehouseId(inventory.getWarehouse().getId())
                 .movementId(inventoryMovement.getId())
-                .releaseQuantity(releaseStockRequest.getQuantity())
+                .releaseQuantity(quantity)
                 .reference(inventoryMovement.getReference())
                 .referenceType(ReferenceType.ORDER)
                 .releaseAt(inventoryMovement.getCreatedAt())
@@ -111,18 +113,15 @@ public class StockService {
     }
 
     @Transactional
-    public ShipStockResponse shipStock(ShipStockRequest shipStockRequest) {
+    public ShipStockResponse shipStock(UUID warehouseId, UUID productId, int quantity, String orderReference ) {
 
-        Inventory inventory = findInventoryByWarehouseIdAndProductId(
-                shipStockRequest.getWarehouseId(),
-                shipStockRequest.getProductId()
-        );
+        Inventory inventory = findInventoryByWarehouseIdAndProductId(warehouseId, productId);
 
-        inventory.ship(shipStockRequest.getQuantity());
+        inventory.ship(quantity);
         inventoryRepository.save(inventory);
 
         InventoryMovement inventoryMovement = createInventoryMovement(inventory.getWarehouse(),inventory.getProduct(),
-                shipStockRequest.getQuantity(),ReferenceType.ORDER,MovementType.OUT);
+                quantity,ReferenceType.ORDER,MovementType.OUT, orderReference);
 
         inventoryMovementRepository.save(inventoryMovement);
 
@@ -130,7 +129,7 @@ public class StockService {
                 .movementId(inventoryMovement.getId())
                 .productId(inventory.getProduct().getId())
                 .warehouseId(inventory.getWarehouse().getId())
-                .shipQuantity(shipStockRequest.getQuantity())
+                .shipQuantity(quantity)
                 .reference(inventoryMovement.getReference())
                 .build();
     }
@@ -142,7 +141,7 @@ public class StockService {
                         .formatted(productId,warehouseId)));
     }
 
-    private InventoryMovement createInventoryMovement(Warehouse warehouse,Product product,int quantity, ReferenceType referenceType, MovementType movementType){
+    private InventoryMovement createInventoryMovement(Warehouse warehouse,Product product,int quantity, ReferenceType referenceType, MovementType movementType, String orderReference){
 
         return InventoryMovement.builder()
                 .warehouse(warehouse)
@@ -150,7 +149,7 @@ public class StockService {
                 .quantity(quantity)
                 .movementType(movementType)
                 .referenceType(referenceType)
-                .reference(referenceSequenceService.generateReference(referenceType,warehouse.getId()))
+                .reference(orderReference)
                 .build();
     }
 }

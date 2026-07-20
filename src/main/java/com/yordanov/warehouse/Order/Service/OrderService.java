@@ -3,11 +3,10 @@ package com.yordanov.warehouse.Order.Service;
 import com.yordanov.warehouse.Exception.ResourceNotFoundException;
 import com.yordanov.warehouse.InventoryMovement.Model.ReferenceType;
 import com.yordanov.warehouse.Order.Model.Order;
-import com.yordanov.warehouse.Order.Model.OrderStatus;
-import com.yordanov.warehouse.Order.Model.OrderType;
 import com.yordanov.warehouse.Order.Repository.OrderRepository;
 import com.yordanov.warehouse.OrderItem.Model.OrderItem;
 import com.yordanov.warehouse.ReferenceSequence.Service.ReferenceSequenceService;
+import com.yordanov.warehouse.StockService.StockService;
 import com.yordanov.warehouse.Warehouse.Model.Warehouse;
 import com.yordanov.warehouse.Warehouse.Repository.WarehouseRepository;
 import com.yordanov.warehouse.Web.Dto.*;
@@ -25,14 +24,17 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ReferenceSequenceService referenceSequenceService;
     private final WarehouseRepository warehouseRepository;
+    private final StockService stockService;
 
 
     public OrderService(OrderRepository orderRepository,
                         ReferenceSequenceService referenceSequenceService,
-                        WarehouseRepository warehouseRepository) {
+                        WarehouseRepository warehouseRepository, StockService stockService) {
         this.orderRepository = orderRepository;
         this.referenceSequenceService = referenceSequenceService;
         this.warehouseRepository = warehouseRepository;
+        this.stockService = stockService;
+        
     }
 
     @Value("${app.default-warehouse-id}")
@@ -48,84 +50,37 @@ public class OrderService {
         String reference = referenceSequenceService.generateReference(ReferenceType.ORDER, warehouse.getId());
         Order order = Order.createCustomerOrder(reference, customerId, warehouse, items);
 
+        for (OrderItem item : order.getItems()) {
+        stockService.reserveStock(warehouse.getId(), item.getProductId(), item.getQuantity(), order.getOrderReference());
+}
         return  orderRepository.save(order);
     }
 
-    // @Transactional
-    // public Order createCustomerOrder(CustomerOrderRequest request, UUID customerId) {
-    //     List<OrderItem> items = createOrderItems(request.items(), null);
+    @Transactional
+    public Order cancelCustomerOrder(UUID orderId, String reason){
 
-    //     Order order = Order.builder()
-    //             .orderReference(referenceSequenceService.generateReference(ReferenceType.ORDER, null))
-    //             .orderStatus(OrderStatus.CREATED)
-    //             .customerId(customerId)
-    //             .orderType(OrderType.ONLINE)
-    //             .reserved(false)
-    //             .createdAt(LocalDateTime.now())
-    //             .updatedAt(LocalDateTime.now())
-    //             .items(items)
-    //             .build();
+        Order order = orderRepository.findById(orderId).orElseThrow(() ->  new ResourceNotFoundException("Order %s not found".formatted(orderId))); 
+        order.cancel(reason);  
+        for (OrderItem item : order.getItems()){
+            stockService.releaseStock(order.getWarehouse().getId(), item.getProductId(), item.getQuantity(), order.getOrderReference());
+        }
 
-    //     items.forEach(item -> item.setOrder(order));
+    
+        return orderRepository.save(order);
+    }
 
-    //     Order savedOrder = orderRepository.save(order);
+    public Order shipCustomerOrder(UUID orderId) {
+        
+        Order order = orderRepository.findById(orderId).orElseThrow(() ->  new ResourceNotFoundException("Order %s not found".formatted(orderId))); 
+        order.markShipped();
+        for (OrderItem item : order.getItems()) {
+            stockService.shipStock(order.getWarehouse().getId(), item.getProductId(),
+                    item.getQuantity(), order.getOrderReference());
+        }
+        return orderRepository.save(order);
+    }
 
-    //     // Publish event - StockEventListener will handle auto-reservation
-    //     eventPublisher.publishEvent(new OrderCreatedEvent(this, savedOrder));
-
-    //     return savedOrder;
-    // }
-
-    // @Transactional
-    // public Order createEmployeeOrder(EmployeeOrderRequest request, UUID employeeId) {
-    //     List<OrderItem> items = createOrderItems(request.items(), request.warehouseId());
-
-    //     Order order = Order.builder()
-    //             .orderReference(request.externalReference())
-    //             .orderStatus(OrderStatus.CREATED)
-    //             .customerId(request.customerId())
-    //             .createdByEmployeeId(employeeId)
-    //             .orderType(OrderType.MANUAL)
-    //             .reserved(false)
-    //             .createdAt(LocalDateTime.now())
-    //             .updatedAt(LocalDateTime.now())
-    //             .items(items)
-    //             .build();
-
-    //     items.forEach(item -> item.setOrder(order));
-
-    //     Order savedOrder = orderRepository.save(order);
-
-    //     // Publish event
-    //     eventPublisher.publishEvent(new OrderCreatedEvent(this, savedOrder));
-
-    //     return savedOrder;
-    // }
-
-    // @Transactional
-    // public Order createImportOrder(ImportOrderRequest request) {
-    //     List<OrderItem> items = createOrderItems(request.items(), request.warehouseId());
-
-    //     Order order = Order.builder()
-    //             .orderReference(request.externalOrderId())
-    //             .orderStatus(OrderStatus.CREATED)
-    //             .customerId(request.customerId())
-    //             .orderType(OrderType.IMPORT)
-    //             .reserved(false)
-    //             .createdAt(LocalDateTime.now())
-    //             .updatedAt(LocalDateTime.now())
-    //             .items(items)
-    //             .build();
-
-    //     items.forEach(item -> item.setOrder(order));
-
-    //     Order savedOrder = orderRepository.save(order);
-
-    //     // Publish event
-    //     eventPublisher.publishEvent(new OrderCreatedEvent(this, savedOrder));
-
-    //     return savedOrder;
-    // }
+   
 
     private List<OrderItem> createOrderItems(List<OrderItemRequest> itemRequests) {
         return itemRequests.stream()
@@ -136,30 +91,5 @@ public class OrderService {
                 .toList();
     }
 
-    // public Order updateOrderStatus(UUID orderId, OrderStatus status) {
-    //     Order order = orderRepository.findById(orderId)
-    //             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-    //     order.setOrderStatus(status);
-    //     order.setUpdatedAt(LocalDateTime.now());
-    //     return orderRepository.save(order);
-    // }
-
-    // public Order markAsReserved(UUID orderId) {
-    //     Order order = orderRepository.findById(orderId)
-    //             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-    //     order.setReserved(true);
-    //     order.setOrderStatus(OrderStatus.RESERVED);
-    //     order.setUpdatedAt(LocalDateTime.now());
-    //     return orderRepository.save(order);
-    // }
-
-    // public Order markAsReservationFailed(UUID orderId, String reason) {
-    //     Order order = orderRepository.findById(orderId)
-    //             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-    //     order.setReserved(false);
-    //     order.setReservationFailureReason(reason);
-    //     order.setOrderStatus(OrderStatus.CREATED);  // Back to CREATED state
-    //     order.setUpdatedAt(LocalDateTime.now());
-    //     return orderRepository.save(order);
-    // }
+   
 }

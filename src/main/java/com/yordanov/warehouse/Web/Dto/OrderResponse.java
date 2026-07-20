@@ -1,5 +1,6 @@
 package com.yordanov.warehouse.Web.Dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.yordanov.warehouse.Order.Model.OrderStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,8 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateOrderResponse {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class OrderResponse {
 
     @Schema(description = "Generated order identifier", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
     private UUID orderId;
@@ -28,5 +30,8 @@ public class CreateOrderResponse {
 
     @Schema(description = "Created order line items")
     private List<OrderItemResponse> items;
+
+    @Schema(description = "Reason when order is cancelled")
+    private String cancellationReason;
 
 }

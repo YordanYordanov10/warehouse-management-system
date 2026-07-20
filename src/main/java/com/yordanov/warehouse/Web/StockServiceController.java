@@ -42,48 +42,5 @@ public class StockServiceController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @Operation(summary = "Reserve stock",
-            description = "Reserves stock for a specific product and warehouse")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Stock reserved successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "404", description = "Product or warehouse not found"),
-            @ApiResponse(responseCode = "409", description = "Insufficient stock available")
-    })
-    @PostMapping("/reserve")
-    public ResponseEntity<ReserveStockResponse> reserveStock(@Valid @RequestBody ReserveStockRequest request) {
 
-        ReserveStockResponse response = stockService.reserveStock(request);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    @Operation(summary = "Release stock",
-            description = "Releases reserved stock for a specific product and warehouse")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Stock released successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "404", description = "Product or warehouse not found"),
-            @ApiResponse(responseCode = "409", description = "No reserved stock to release")
-    })
-    @PostMapping("/release")
-    public ResponseEntity<ReleaseStockResponse> releaseStock(@Valid @RequestBody ReleaseStockRequest request) {
-
-        ReleaseStockResponse response = stockService.releaseStock(request);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    @Operation(summary = "Ship stock",
-            description = "Ships reserved stock for a specific product and warehouse")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Stock shipped successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "404", description = "Product or warehouse not found"),
-            @ApiResponse(responseCode = "409", description = "No reserved stock to ship")
-    })
-    @PostMapping("/ship")
-    public ResponseEntity<ShipStockResponse> shipStock(@Valid @RequestBody ShipStockRequest request) {
-
-        ShipStockResponse response = stockService.shipStock(request);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
 }
