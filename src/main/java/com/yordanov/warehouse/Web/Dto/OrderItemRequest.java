@@ -14,9 +14,6 @@ public record OrderItemRequest(
 
         @Schema(description = "Ordered quantity", example = "5")
         @Min(value = 1, message = "Quantity must be at least 1")
-        int quantity,
+        int quantity
 
-        @Schema(description = "Warehouse identifier for this line item", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
-        @NotNull(message = "Warehouse ID is required")
-        UUID warehouseId
 ) {}

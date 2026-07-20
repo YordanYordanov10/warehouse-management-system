@@ -1,5 +1,5 @@
 package com.yordanov.warehouse.Order.Model;
 
 public enum OrderStatus {
-    CREATED, RESERVED, SHIPPED, CANCEL, FAILED
+     RESERVED, SHIPPED, CANCELLED
 }

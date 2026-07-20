@@ -15,7 +15,7 @@ import java.util.UUID;
 @Entity
 @Table(
         uniqueConstraints = @UniqueConstraint(
-                columnNames = {"type", "warehouse_id", "date"}
+                columnNames = {"type", "warehouse_id", "referenceDate"}
         )
 )
 public class ReferenceSequence {
@@ -28,11 +28,14 @@ public class ReferenceSequence {
     @Column(nullable = false)
     private ReferenceType type;
 
+    @Version
+    private int version;
+
     @Column(nullable = true)
     private UUID warehouseId;
 
     @Column(nullable = false)
-    private LocalDate date;
+    private LocalDate referenceDate;
 
     @Column(nullable = false)
     private long currentValue;

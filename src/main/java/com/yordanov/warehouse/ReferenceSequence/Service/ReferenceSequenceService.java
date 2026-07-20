@@ -23,14 +23,14 @@ public class ReferenceSequenceService {
 
     public String generateReference(ReferenceType type, UUID warehouseId) {
 
-        LocalDate date = LocalDate.now();
+          LocalDate reference_date = LocalDate.now();
 
         ReferenceSequence referenceSequence = referenceSequenceRepository
-                .findByTypeAndWarehouseIdAndDate(type, warehouseId, date)
+                .findByTypeAndWarehouseIdAndReferenceDate(type, warehouseId, reference_date)
                 .orElseGet(() -> ReferenceSequence.builder()
                         .type(type)
                         .warehouseId(warehouseId)
-                        .date(date)
+                        .referenceDate(reference_date)
                         .currentValue(0L)
                         .build());
 
@@ -42,21 +42,21 @@ public class ReferenceSequenceService {
 
         if (warehouseId != null) {
             warehouseCode = warehouseRepository.findById(warehouseId).
-                    orElseThrow(() -> new ResourceNotFoundException("No such Warehouse by given warehouse code - %s")).getWarehouseCode();
+                    orElseThrow(() -> new ResourceNotFoundException("No such Warehouse by given warehouse code - %s".formatted(warehouseId))).getWarehouseCode();
         }
 
-        return buildReference(type, warehouseCode, date, referenceSequence.getCurrentValue());
+        return buildReference(type, warehouseCode, reference_date, referenceSequence.getCurrentValue());
     }
 
-    private String buildReference(ReferenceType type, String warehouseCode, LocalDate date, long currentValue) {
+    private String buildReference(ReferenceType type, String warehouseCode, LocalDate reference_date, long currentValue) {
         String reference  = null;
 
         String formattedSequence = String.format("%06d", currentValue);
 
         if(warehouseCode == null) {
-            reference = type + "-" + date + "-" +  formattedSequence;
+            reference = type + "-" + reference_date + "-" +  formattedSequence;
         } else {
-          reference = type + "-" + warehouseCode + "-" + date + "-" + formattedSequence;
+          reference = type + "-" + warehouseCode + "-" + reference_date + "-" + formattedSequence;
         }
 
         return reference;
