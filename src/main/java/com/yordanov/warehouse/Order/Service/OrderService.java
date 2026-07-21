@@ -69,6 +69,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    @Transactional
     public Order shipCustomerOrder(UUID orderId) {
         
         Order order = orderRepository.findById(orderId).orElseThrow(() ->  new ResourceNotFoundException("Order %s not found".formatted(orderId))); 

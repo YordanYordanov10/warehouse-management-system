@@ -28,12 +28,12 @@ public class StockService {
     private final ReferenceSequenceService referenceSequenceService;
  
 
-    public StockService(ProductRepository productRepository, WarehouseRepository warehouseRepository, InventoryRepository inventoryRepository, InventoryMovementRepository inventoryMovementRepository, ReferenceSequenceService referenceSequenceService, ReferenceSequenceService referenceSequenceService2) {
+    public StockService(ProductRepository productRepository, WarehouseRepository warehouseRepository, InventoryRepository inventoryRepository, InventoryMovementRepository inventoryMovementRepository, ReferenceSequenceService referenceSequenceService) {
         this.productRepository = productRepository;
         this.warehouseRepository = warehouseRepository;
         this.inventoryRepository = inventoryRepository;
         this.inventoryMovementRepository = inventoryMovementRepository;
-        this.referenceSequenceService = referenceSequenceService2;
+        this.referenceSequenceService = referenceSequenceService;
     }
 
     @Transactional
