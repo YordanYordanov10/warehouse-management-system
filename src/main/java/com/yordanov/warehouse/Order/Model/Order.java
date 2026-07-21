@@ -1,8 +1,6 @@
 package com.yordanov.warehouse.Order.Model;
 
 import com.yordanov.warehouse.Exception.ConflictException;
-import com.yordanov.warehouse.Order.Model.OrderStatus;
-import com.yordanov.warehouse.Order.Model.OrderType;
 import com.yordanov.warehouse.OrderItem.Model.OrderItem;
 import com.yordanov.warehouse.Warehouse.Model.Warehouse;
 
