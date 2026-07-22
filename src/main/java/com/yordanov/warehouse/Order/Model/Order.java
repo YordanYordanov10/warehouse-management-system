@@ -2,6 +2,7 @@ package com.yordanov.warehouse.Order.Model;
 
 import com.yordanov.warehouse.Exception.ConflictException;
 import com.yordanov.warehouse.OrderItem.Model.OrderItem;
+import com.yordanov.warehouse.User.Model.User;
 import com.yordanov.warehouse.Warehouse.Model.Warehouse;
 
 import jakarta.persistence.*;
@@ -61,6 +62,10 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public static Order createCustomerOrder(String reference, UUID customerId, Warehouse warehouse, List<OrderItem> items){
         if (items == null || items.isEmpty()) {
