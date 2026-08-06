@@ -1,4 +1,4 @@
-package com.yordanov.warehouse.Security;
+package com.yordanov.warehouse.Security.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,6 +10,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.yordanov.warehouse.User.Model.User;
 
+import lombok.Getter;
+
+@Getter
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
@@ -33,7 +36,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return user.getUsername();
     }
 
     @Override

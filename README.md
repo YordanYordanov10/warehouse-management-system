@@ -2,7 +2,7 @@
 
 Backend warehouse management system built with Spring Boot.
 
-The project focuses on realistic business logic for warehouse operations, inventory tracking, stock reservations, and order processing. It includes a REST API, Swagger documentation, and architecture prepared for JWT authentication and future event-driven extensions.
+The project focuses on realistic business logic for warehouse operations, inventory tracking, stock reservations, and order processing. It includes a REST API, Swagger documentation, unit-tested domain logic, and an architecture prepared for JWT authentication and future event-driven extensions.
 
 ---
 
@@ -22,8 +22,8 @@ The project focuses on realistic business logic for warehouse operations, invent
 * Create orders
 * Add order items
 * Validate stock availability during order creation
-* Order status flow
-* Preparation for shipment/dispatch logic
+* Order status flow (`RESERVED` → `SHIPPED` / `CANCELLED`)
+* Cancel and ship reserved orders, with stock automatically released or consumed
 
 ## Reservation Flow
 
@@ -40,6 +40,13 @@ The project focuses on realistic business logic for warehouse operations, invent
 * Request validation
 * Global exception handling
 
+## Testing
+
+* Unit tests for domain logic (`Inventory`, `Order`)
+* Happy-path and edge-case coverage (invalid quantities, boundary values, invalid state transitions)
+* JaCoCo code coverage reporting
+* Service-level and integration tests (planned)
+
 ## Planned Features
 
 * JWT Authentication
@@ -49,7 +56,6 @@ The project focuses on realistic business logic for warehouse operations, invent
 * Async processing
 * Audit logging
 * Docker support
-* Unit and integration testing
 
 ---
 
@@ -72,6 +78,11 @@ The project focuses on realistic business logic for warehouse operations, invent
 ## Documentation
 
 * Swagger / OpenAPI
+
+## Testing
+
+* JUnit 5
+* JaCoCo
 
 ## Build Tools
 
@@ -117,15 +128,17 @@ Security (planned)
 4. Save order items
 5. Update order status
 
-## Release Reservation
+## Cancel Order
 
-* Release reserved quantities when an order is canceled or fails
+* Only orders in `RESERVED` status can be cancelled
+* Releases the reserved quantities back to available stock
+* Records a cancellation reason
 
 ## Ship Order
 
-* Confirm the order
-* Reduce actual inventory quantity
-* Finalize reservation
+* Only orders in `RESERVED` status can be shipped
+* Reduces actual inventory quantity and clears the reservation
+* Updates order status to `SHIPPED`
 
 ---
 
@@ -172,6 +185,18 @@ spring.jpa.show-sql=true
 mvn spring-boot:run
 ```
 
+## Run Tests
+
+```bash
+mvn test
+```
+
+Coverage report is generated at:
+
+```text
+target/site/jacoco/index.html
+```
+
 ---
 
 # API Examples
@@ -184,9 +209,10 @@ POST /api/products
 
 ```json
 {
-  "name": "Keyboard",
-  "sku": "KB-001",
-  "quantity": 50
+  "name": "Laptop",
+  "sku": "LAP12345",
+  "description": "A high-performance laptop for gaming and work",
+  "price": 999.99
 }
 ```
 
@@ -200,11 +226,29 @@ POST /api/orders
 {
   "items": [
     {
-      "productId": 1,
+      "productId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "quantity": 2
     }
   ]
 }
+```
+
+## Cancel Order
+
+```http
+POST /api/orders/{id}/cancel
+```
+
+```json
+{
+  "reason": "Customer requested cancellation"
+}
+```
+
+## Ship Order
+
+```http
+POST /api/orders/{id}/ship
 ```
 
 ---
@@ -225,13 +269,15 @@ POST /api/orders
 
 * Core inventory logic
 * Product management
-* Order management
+* Order management (create, cancel, ship)
 * Reservation flow
 * Swagger integration
 * Validation and exception handling
+* Unit test coverage for domain layer (`Inventory`, `Order`)
 
 ## In Progress
 
+* Service-level and integration testing
 * Event system refactor
 * Security layer
 * JWT authentication
